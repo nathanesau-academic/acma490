@@ -1,0 +1,130 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+
+\title{Stochastic Differential Equations - Parameter Estimation}
+\author{Nathan Esau}
+\date{Feb 8, 2017}
+
+\usepackage{Sweave}
+\begin{document}
+
+\maketitle
+
+We can equate the covariance function and expected value function of a stochastic differential equation and its corresponding time series model. Then we solve for the parameters of the SDE in terms of the time series model. This is know as the \textbf{principle of covariance equivalence}.
+
+\section{Ornstein-Uhlenbeck process}
+
+The AR(1) time series model corresponds to the OU model. The parameter estimates are shown below. Note that $\Delta$ is known.
+
+\subsection{AR(1) to OU}
+
+\begin{itemize}
+\item Known parameters: $\phi_{1}, \sigma_{a}$
+\item Unknown parameters: $\alpha, \sigma$
+\end{itemize}
+
+\begin{align}
+\alpha &= \dfrac{-\ln(\phi_{1})}{\Delta} \\
+\sigma^2 &= \dfrac{2\alpha \sigma_{a}^{2}}{1 - \phi_{1}^{2}}
+\end{align}
+
+\subsection{OU to AR(1)}
+
+\begin{itemize}
+\item Known parameters: $\alpha, \sigma$
+\item Unknown parameters: $\phi_{1}, \sigma_{a}$
+\end{itemize}
+
+\begin{align}
+\phi_{1} &= e^{-\alpha \Delta} \\
+\sigma_{a}^{2} &= \dfrac{\sigma^2}{2\alpha} (1 - \phi_{1}^{2})
+\end{align}
+
+\section{Second Order SDE}
+
+\begin{itemize}
+\item Let $\mu_{1}$ and $\mu_{2}$ be the eigenvalues of $A = \left(\begin{array}{cc} \alpha_{1} & \alpha_{0} \\ 1 & 0 \end{array} \right)$, i.e. $\mu_{1} = \dfrac{1}{2} \left(\alpha_{1} + \sqrt{\alpha_{1}^{2} + 4\alpha_{0}}\right)$ and $\mu_{2} = \dfrac{1}{2} \left(\alpha_{1} + \sqrt{\alpha_{1}^{2} - 4\alpha_{0}}\right)$
+\item Let $\lambda_{1}$ and $\lambda_{2}$ be the roots of the AR(2) characteristic equation, i.e. $\lambda_{1} = \dfrac{1}{2} \left( \phi_{1} + \sqrt{\phi_{1}^{2} + 4\phi_{2}} \right)$ and $\lambda_{2} = \dfrac{1}{2} \left( \phi_{1} - \sqrt{\phi_{1}^{2} + 4\phi_{2}} \right)$
+\end{itemize}
+
+\subsection{ARMA(2,1) to Second Order SDE}
+
+%The objective is to minimize a function of two variables $f(\alpha_{0}, \alpha_{1})$ which returns the sum of squares of an ARMA(2,1) model. In other words
+%
+%\begin{Schunk}
+%\begin{Sinput}
+%> f <- function(alpha0, alpha1) {
+%+ 	1. Compute mu1, mu2
+%+ 	2. Compute lambda1, lambda2
+%+ 	3. Compute phi1, phi2
+%+ 	4. Compute theta1
+%+ 	5. Compute sum of squares of residuals of ARMA(2, 1) model
+%+ 	6. Return sum of squares
+%+ }
+%\end{Sinput}
+%\end{Schunk}
+%
+%Once this is done, we have estimates of SDE parameters $\alpha_{0}, \alpha_{1}$, and we have $\theta_{1}, \mu_{1}, \mu_{2}, \lambda_{1}, \lambda_{2}$ computed. So we can compute
+%
+%\begin{align}
+%\sigma^2 &= \sigma_{a}^{2} \cdot 2\mu_{1}(\mu_{1}^{2} - \mu_{2}^{2}) \cdot \dfrac{(\lambda_{1} - \theta_{1})}{(\lambda_{1} - \lambda_{2})^2} \left(\dfrac{\lambda_{1} - \theta_{1}}{1 - \lambda_{1}^{2}} - \dfrac{\lambda_{2} - \theta_{1}}{1 - \lambda_{1}\lambda_{2}}\right)
+%\end{align}
+
+The simplified estimation procedure is described below.
+
+\begin{itemize}
+\item Known parameters: $\phi_{1}, \phi_{2} \implies \lambda_{1}, \lambda_{2}$ are known
+\item Unknown parameters: $\alpha_{1}, \alpha_{2} \implies \mu_{1}, \mu_{2}$ are unknown
+\end{itemize}
+
+First compute the eigenvalues
+
+\begin{align}
+\mu_{1} &= \ln(\lambda_{1}) / \Delta \\
+\mu_{2} &= \ln(\lambda_{2}) / \Delta
+\end{align}
+
+Next, compute the unknown SDE parameters
+
+\begin{align}
+\alpha_{1} &= \mu_{1} + \mu_{2} \\
+\alpha_{0} &= -\mu_{1} \mu_{2}
+\end{align}
+
+\subsection{Second Order SDE to ARMA(2, 1)}
+
+\begin{itemize}
+\item Known parameters: $\alpha_{0}, \alpha_{1}, \sigma \implies \mu_{1}, \mu_{2}$ are known
+\item Unknown parameters: $\phi_{1}, \phi_{2}, \theta_{1}, \sigma_{a} \implies \lambda_{1}, \lambda_{2}$ are unknown
+\end{itemize}
+
+First, compute roots of AR(2) characteristic equation
+
+\begin{align}
+\lambda_{1} &= e^{\mu_{1} \Delta} \\
+\lambda_{2} &= e^{\mu_{2} \Delta} 
+\end{align}
+
+Next, compute
+
+\begin{align}
+\phi_{1} = \lambda_{1} + \lambda_{2} \\
+\phi_{2} = -\lambda_{1} \lambda_{2}
+\end{align}
+
+Next define $P = \dfrac{-\mu_{1}(1 + \lambda_{1}^2)(1 - \lambda_{2}^2) + \mu_{2} (1 + \lambda_{2}^{2}) (1 - \lambda_{1}^{2})}{\mu_{1} \lambda_{1} (1 - \lambda_{2}^{2}) - \mu_{2}\lambda_{2} (1 - \lambda_{1}^2)}$ . Then $\theta_{1}$ is the root of the equation
+
+\begin{align}
+\theta_{1}^{2} + 2P\theta_{1} + 1 = 0 \qquad \text{choose the root such that $|\theta_{1}| < 1$}
+\end{align}
+
+
+Also, we have that
+
+\begin{align}
+\sigma_{a}^{2} &= \dfrac{\sigma^2}{2\mu_{1}(\mu_{1}^{2} - \mu_{2}^{2})} \dfrac{(\lambda_{1} - \lambda_{2})^2}{(\lambda_{1} - \theta_{1})} \left(\dfrac{\lambda_{1} - \theta_{1}}{1 - \lambda_{1}^{2}} - \dfrac{\lambda_{2} - \theta_{1}}{1 - \lambda_{1}\lambda_{2}}\right)^{-1}
+\end{align}
+
+\end{document}

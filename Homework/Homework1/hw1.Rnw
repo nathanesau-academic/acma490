@@ -1,0 +1,119 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage[links,assignheader]{assign}
+
+\lhead{Homework \#1 \\ Acma 490}
+\rhead{Nathan Esau \\ 301197568}
+
+\begin{document}
+
+\begin{question}
+Fit an AR(1) model to the data by implementing the least square method presented on page 10 of the lecture notes.
+\end{question}
+
+\begin{solution}
+The time series data is plotted in Figure \ref{fig:tsplot}.
+
+<<echo=FALSE, fig=TRUE, include=FALSE, label=tsplot>>=
+tsdata <- read.csv("D:/acma490/hw1/hw1_data.csv")
+tsdata$Date <- as.Date(tsdata$Date, format="%d-%b-%y")
+tsdata <- tsdata[order(tsdata$Date),] # sort by date
+
+plot(tsdata$Date, tsdata$Series, type = 'l',
+	xlab = "Date", ylab= "")
+@
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{hw1-tsplot}
+\end{center}
+\vspace{-10mm}
+\caption{Data for Homework 1}
+\label{fig:tsplot}
+\end{figure}
+
+\medskip\noindent
+The least squares method is implemented below in \texttt{R} and the parameter estimates are calculated for the provided time series.
+
+<<echo=TRUE>>=
+fit.ar1 <- function(x) {
+  
+  N <- length(x)
+  
+  # based on (3.17) and (3.18)
+  phi1 = sum(x[2:N] * x[1:(N-1)]) / sum(x[1:(N-1)]^2)
+  sigma2 = sum((x[2:N] - phi1 * x[1:(N-1)])^2) / (N - 1)
+  
+  names(phi1) <- "ar1"
+  
+  list(coef = phi1, sigma2 = sigma2)
+}
+
+y <- tsdata$Series
+x <- tsdata$Series - mean(y)
+model1 <- fit.ar1(x)
+@
+
+<<echo=FALSE>>=
+model1.phi1 <- model1$coef
+model1.sigma2 <- model1$sigma2
+@
+
+\medskip\noindent
+This gives $\hat{\phi}_{1} = \Sexpr{round(model1.phi1, 8)}$ and $\hat{\sigma}^{2}_{a} = \Sexpr{round(model1.sigma2, 8)}$.
+
+\end{solution}
+
+\begin{question}
+Fit an AR(1) model to the data using a package.
+
+<<echo=TRUE>>=
+model2 <- arima(x, c(1,0,0), include.mean = FALSE, method = 'CSS')
+model3 <- arima(x, c(1,0,0), include.mean = FALSE, method = 'CSS-ML')
+@
+
+<<echo=FALSE>>=
+model2.phi1 <- model2$coef
+model2.sigma2 <- model2$sigma2
+model3.phi1 <- model3$coef
+model3.sigma2 <- model3$sigma2
+@
+
+\medskip\noindent
+\begin{enumerate}[(i)]
+\item If method \texttt{CSS} is used, we get $\hat{\phi}_{1} = \Sexpr{round(model2.phi1, 8)}$ and $\hat{\sigma}^{2}_{a} = \Sexpr{round(model2.sigma2, 8)}$.
+\item If method \texttt{CSS-ML} is used (i.e. the default method), we get $\hat{\phi}_{1} = \Sexpr{round(model3.phi1, 8)}$ and $\hat{\sigma}^{2}_{a} = \Sexpr{round(model3.sigma2, 8)}$.
+\end{enumerate}
+
+\end{question}
+
+\begin{question}
+Compare the fitted models.
+\end{question}
+
+\begin{solution}
+The fitted models are compared in Table \ref{tab:models}.
+
+<<echo=FALSE, results=tex>>=
+models <- data.frame(
+  model = c("\\texttt{model1}", "\\texttt{model2}", "\\texttt{model3}"),
+  ar1 = c(model1$coef, model2$coef, model3$coef),
+  sigma2 = c(model1$sigma2, model2$sigma2, model3$sigma2),
+  call = c("\\texttt{fit.ar1}", "\\texttt{arima(method = `CSS')}",
+           "\\texttt{arima(method = `CSS-ML')}")
+)
+
+names(models) <- c("Model", "$\\hat{\\phi}_{1}$", "$\\hat{\\sigma}^{2}_{a}$",
+	"Call")
+
+library(xtable)
+print(xtable(models, label = "tab:models",
+caption = "Comparison of fitted models",
+digits = c(0,0, 8, 8, 0)), include.rownames = FALSE,
+sanitize.text=function(x){x})
+@
+
+\end{solution}
+
+\end{document}

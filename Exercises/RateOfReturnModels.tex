@@ -1,0 +1,752 @@
+\documentclass{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage[links,assignheader]{assign}
+\usepackage{cancel}
+\usepackage{lifecon}
+
+\usepackage{parskip}
+
+\title{Acma 490 Exercises}
+\author{Nathan Esau}
+\date{\today}
+
+\lhead{Acma 490 Exercises \\ Spring 2017}
+\rhead{Nathan Esau \\ 301197568}
+
+\numberwithin{questioncounter}{section}
+
+\usepackage{Sweave}
+\begin{document}
+\input{RateOfReturnModels-concordance}
+
+\thispagestyle{empty}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\setcounter{section}{1}
+\section{Introduction}
+
+\begin{question}
+Verify the portfolio values for the example in Section 2.1.
+\end{question}
+
+\begin{solution}
+We purchase $N_{1}$ bonds with time to maturity 1, $N_{2}$ bonds with time to maturity 4 and $N_{3}$ bonds with time to maturity 10. $N_{1}$ can be set arbitrarily, in this case to $N_{1} = 707.891$.
+
+We want the time 0 value of our portfolio to be zero, i.e.
+
+\begin{align*}
+N_{1} e^{-0.06(1)} + N_{2} e^{-0.06(4)} + N_{3} e^{-0.06(10)} &= 0
+\end{align*}
+
+Also, we want the duration of our portfolio (which is proportional to the first derivative with respect to the interest rate $r$) to equal 0, i.e.
+
+\begin{align*}
+\dfrac{d}{dr} \Big[N_{1} e^{-r(1)} + N_{2} e^{-r(4)} + N_{3} e^{-r(10)} \Big|_{r_{0}} &= 0 \\
+\Big[N_{1} e^{-r(1)} + 4N_{2} e^{-r(4)} + 10N_{3} e^{-0.06(10)} \Big|_{r_{0}} &= 0 \\
+N_{1} e^{-0.06(1)} + 4N_{2} e^{-0.06(4)} + 10N_{3} e^{-0.06(10)} &= 0
+\end{align*}
+
+Setting $N_{1} = 707.891$ gives the following two equations
+
+\begin{align*}
+N_{2} e^{-0.06(4)} + N_{3} e^{-0.06(10)} &= -707.891 e^{-0.06(1)} \\
+4N_{2} e^{-0.06(4)} + 10N_{3} e^{-0.06(10)} &= -707.891 e^{-0.06(1)}
+\end{align*}
+
+Subtracting four times the first second into the second equation gives
+
+\begin{align*}
+6N_{3} e^{-0.06(10)} &= 3(707.891) e^{-0.06(1)} \implies N_{3} = 607.373
+\end{align*}
+
+and $N_{2} = \dfrac{-707.891 e^{-0.06(1)} - 607.373e^{-0.06(10)}}{e^{-0.06(4)}} = -1271.25$. The portfolio value at time 1 is
+
+\medskip
+
+\begin{itemize}
+\item Up case: $707.891 - 1271 e^{-0.09(3)} + 607.373 + e^{-0.09(9)} = 7.64$
+\item Down case: $707.891 - 1271.25 e^{-0.04(3)} + 607.373e^{-0.04(9)} = 4.14$
+\end{itemize}
+
+\end{solution}
+
+\begin{question}
+Consider a par 5-year bond with 4\% annual coupons and a redemption value of \$100 priced to yield 5\%.
+
+\begin{enumerate}[(a)]
+\item Calculate the price of the bond.
+\item Calculate the duration of the bond.
+\end{enumerate}
+
+\end{question}
+
+\begin{solution}
+\begin{enumerate}[(a)]
+\item The price is
+
+\begin{align*}
+P &= 100(0.04) a_{\lcroof{5} 5\%} + 100 v^{5}_{5\%} = 95.67
+\end{align*}
+
+\item The first derivative of the price with respect to the interest rate is
+
+\begin{align*}
+\dfrac{dP}{di} &= \dfrac{d}{di} \left[ 4 a_{\lcroof{5}} + 100v^{5} \right]
+\end{align*}
+
+Note that
+
+\begin{align*}
+\dfrac{d}{di} v^{n} &= - n(1+i)^{-n-1} \\
+\dfrac{d}{di} a_{\lcroof{n}} &= \dfrac{d}{di} \dfrac{1 - v^{n}}{i} \\
+&= \dfrac{1}{i} n(1+i)^{-n-1} - \dfrac{1}{i^2} [1 - (1+i)^{-n}]
+\end{align*}
+
+Applying these formulas gives
+
+\begin{align*}
+\dfrac{dP}{di} \Big|_{i = 5\%} &= 4 \left[\dfrac{1}{0.05} 5(1.05^{-6} - \dfrac{1}{0.05^2}[1 - (1.05)^{-5}]\right] - 100(5)(1.05)^{-6} \\
+&= -420.98
+\end{align*}
+
+The (Macaulay) duration is
+
+\begin{align*}
+\dfrac{\dfrac{dP}{di} (1 + i)}{P} &= \dfrac{-420.98 (1.05)}{95.67} = 4.62
+\end{align*}
+
+\end{enumerate}
+\end{solution}
+
+\begin{question}
+The continuous spot rates for different terms $T$ are:
+
+\begin{center}
+\begin{tabular}{l r r r}
+\hline
+$T$ & 1 & 2 & 3 \\ \hline
+$R(0, T)$ & 6\% & 6.5\% & 7\% \\ \hline
+\end{tabular}
+\end{center}
+
+Find the forward rates $F(0, 1, 2)$, $F(0, 1, 3)$ and $F(0, 2, 3)$.
+\end{question}
+
+\begin{solution}
+The bond prices are calculated using $P(0, T) = \exp(-T R(0, T))$ as shown below:
+
+\begin{center}
+\begin{tabular}{l r r r}
+\hline
+$T$ & 1 & 2 & 3 \\ \hline
+$P(0, T)$ & 0.9417645 &  0.8780954 & 0.8105842 \\ \hline
+\end{tabular}
+\end{center}
+
+The forward prices can be calculated using $F(0, T, S) = (S-T)^{-1} log[P(0, T)/P(0, S)]$ for $T < S$, so
+
+\begin{align*}
+F(0, 1, 2) &= (2-1)^{-1} log[0.9417645 / 0.8780954] =  0.07 \\
+F(0, 1, 3) &= (3-1)^{-1} log[0.9417645 / 0.8105842] = 0.075 \\
+F(0, 2, 3) &= (3-2)^{-1} log[0.8780954 / 0.8105842] = 0.08 \\
+\end{align*}
+
+\end{solution}
+
+\newpage
+\setcounter{section}{2}
+\section{Time Series}
+
+\begin{question}
+Find $E[X_{t} X_{t-k} | X_{0}]$ for an AR(1) model.
+\end{question}
+
+\begin{solution}
+The conditional AR(1) model can be written as 
+
+\begin{align*}
+X_{t} &= \sum_{j=0}^{t-1} G_{j} a_{t-j} + G_{t} a_{0} \\
+&= \sum_{j=0}^{t-1} \phi_{1}^{j} a_{t-j} + \phi_{1}^{t} a_{0}
+\end{align*}
+
+so we have that
+
+\begin{align*}
+E[X_{t} X_{t-k} | X_{0}] &= E\left[ \left(\sum_{j=0}^{t-1} \phi_{1}^{j} a_{t-j} + \phi_{1}^{t} a_{0}\right)\left(\sum_{i=0}^{t-k-1} \phi_{1}^{j} a_{t-k-i} + \phi_{1}^{t-k} a_{0}\right) \right] \\
+&= E\left[ \sum_{j=0}^{t-1} \phi_{1}^{j} a_{t-j} \sum_{i=0}^{t-k-i} a_{t-k-i} \right] + E\left[ \phi_{1}^{2t-k} a_{0}a_{0}\right] \\
+&= \sigma_{a}^{2} \left( \phi_{1}^{k} + \phi_{1}^{k+2} + \dots + \phi_{1}^{k + 2(t-k-1)}\right) + E(a_{0}^{2}) \phi_{1}^{2t-k} \\
+&= \sigma_{a}^{2} \phi_{1}^{k} \left(\dfrac{1 - \phi_{1}^{2(t-k)}}{1 - \phi_{1}^{2}}\right) + E(a_{0}^{2}) \phi_{1}^{2t-k}
+\end{align*}
+
+where $a_{0} = X_{0}$.
+
+\end{solution}
+
+\begin{question}
+Find the conditional expectation, variance, and autocovariance function at lag $k$ given $X_{0}$ and $X_{-1}$ for an AR(2) model.
+
+\end{question}
+
+\begin{solution}
+The conditional AR(2) model can be written as
+
+\begin{align*}
+X_{t} &= \sum_{j=0}^{t-1} G_{j} a_{t-j} + G_{t} a_{0} + G_{t +1} a_{-1} \\
+&= \sum_{j=0}^{t-1} \left(g_{1} \lambda_{1}^{j} + g_{2} \lambda_{2}^{j}\right) a_{t-j} + G_{t}a_{0} + G_{t+1} a_{-1}
+\end{align*}
+
+where $g_{1} = \dfrac{\lambda_{1}}{\lambda_{1} - \lambda}$ and $g_{2} = \dfrac{\lambda_{2}}{\lambda_{2} - \lambda_{1}}$. The expected value is
+
+\begin{align*}
+E(X_{t}) &= G_{t} E(a_{0}) + G_{t+1} E(a_{-1}) \\
+&= \left[ \dfrac{\lambda_{1}}{\lambda_{1} - \lambda_{2}} \lambda_{1}^{t} + \dfrac{\lambda_{2}}{\lambda_{2} - \lambda_{1}} \lambda_{2}^{t} \right] E(a_{0}) + \left[\dfrac{\lambda_{1}}{\lambda_{1} - \lambda_{2}} \lambda_{1}^{t+1} + \dfrac{\lambda_{2}}{\lambda_{2} - \lambda_{1}} \lambda_{2}^{t+1}\right] E(a_{-1})
+\end{align*}
+
+where $a_{0} = X_{0} - \phi_{1} X_{-1}$ and $a_{-1} = X_{-1}$.
+
+For the autocovariance function, we have that
+
+\begin{align*}
+Cov(X_{t}, X_{t-k}) &= Cov\left[\sum_{j=0}^{t-1} \left(g_{1}\lambda_{1}^{j} + g_{2} \lambda_{2}^{j} \right) a_{t-j}, \sum_{i=0}^{t-k-1} (g_{1} \lambda_{1}^{i} + g_{2} \lambda_{2}^{i}) a_{t-k-i} \right] \\
+&= \sigma_{a}^{2} \Big[ (g_{1}\lambda_{1}^{k} + g_{2}\lambda_{2}^{k})(g_{1} + g_{2}) + (g_{1} \lambda_{1}^{k+1} + g_{2}\lambda_{2}^{k+1})(g_{1} \lambda_{1} + g_{2}\lambda_{2}) + \dots \ + \\
+&\qquad\qquad (g_{1}\lambda_{1}^{k+(t-k-1)} + g_{2} \lambda_{2}^{k+(t-k-1)})(g_{1}\lambda_{1}^{t-k-1} + g_{2}\lambda_{2}^{t-k-1})\Big] \\
+&= \sigma_{a}^{2} \Big[ g_{1}^{2} (\lambda_{1}^{k} + \lambda_{1}^{k+2} + \dots + \lambda_{1}^{k+2(t-k-1)}) + \\
+&\qquad\qquad g_{1}g_{2}\left[(\lambda_{1}^{k} + \lambda_{1}^{k+1}\lambda_{2} + \dots + \lambda_{1}^{k+(t-k-1)}\lambda_{2}^{t-k-1}) + (\lambda_{2}^{k} + \lambda_{2}^{k+1}\lambda_{1} + \dots + \lambda_{2}^{k+(t-k-1)}\lambda_{1}^{t-k-1})\right] \ + \\
+&\qquad \qquad g_{2}^{2} (\lambda_{2}^{k} + \lambda_{2}^{k+2} + \dots + \lambda_{2}^{k+2(t-k-1)}) \Big] \\
+&= \sigma_{a}^{2} \left[g_{1}^{2} \lambda_{1}^{k} \left(\dfrac{1 - \lambda_{1}^{2(t-k)}}{1 - \lambda_{1}^{2}}\right) + g_{1}g_{2} (\lambda_{1}^{k} + \lambda_{2}^{k})\left(\dfrac{1 - (\lambda_{1} \lambda_{2})^{t-k}}{1 - \lambda_{1}\lambda_{2}}\right) + g_{2}^{2} \lambda_{2}^{k} \left(\dfrac{1 - \lambda_{2}^{2(t-k)}}{1 - \lambda_{2}^{2}}\right)\right]
+\end{align*}
+
+Note that the variance can be found by setting $k = 0$ in $Cov(X_{t}, X_{t-k})$.
+
+\end{solution}
+
+\begin{question}
+Find the expected value and standard deviation of a 5-year annuity-immediate if the force of interest per period (as defined in example 3 above) is modeled by a conditional AR(1) model of the form: $(\delta_{t} - \delta) = \phi_{1} (\delta_{t-1} - \delta) + a_{t}$.
+\end{question}
+
+\begin{solution}
+The R code is below.
+
+\begin{Schunk}
+\begin{Sinput}
+> library(stocins) # see github.com/nathanesau
+> ar1model = iratemodel(params = list(delta = 0.05, delta0 = 0.08,
++   phi1 = 0.90, sigma = 0.01), "ar1")
+> annev = ann.ev(5, ar1model)
+> annvar = ann.var(5, ar1model)
+\end{Sinput}
+\end{Schunk}
+
+Using this code gives $E[a_{\lcroof{5}}] = 4.00004844$ and $\sqrt{Var[a_{\lcroof{5}}]} = 0.08162954$.
+
+\end{solution}
+
+\newpage
+\setcounter{section}{3}
+\section{Stochastic Differential Equations}
+
+\begin{question}
+Derive $cov(Y_{s}, Y_{t})$ when $X_{t}$ is an Ornstein-Uhlenbeck process, see (4.39, 4.40).
+\end{question}
+
+\begin{solution}
+The covariance of $Y_{s}, Y_{t}$ for an OU process is
+
+\begin{align*}
+Cov(Y_{s}, Y_{t}) &= Var(Y_{0}) + \int_{0}^{s} \int_{0}^{r} Cov(X_{r}, X_{u}) du dr + \int_{0}^{s} \int_{r}^{t} Cov(X_{r}, X_{u}) du dr \qquad \text{for $s \leq t$}
+\end{align*}
+
+The first double integral is
+
+\begin{align*}
+& \int_{0}^{s} \int_{0}^{r} Cov(X_{r}, X_{u}) du dr \\ &= \int_{0}^{s} \int_{0}^{r} e^{-\alpha(u+r)} \left[Var(c) + \dfrac{e^{2\alpha u} - 1}{2\alpha} \sigma^2 \right] du dr \\ &= Var(c) \int_{0}^{s} \int_{0}^{r} e^{-\alpha(u+r)} du dr + \dfrac{\sigma^{2}}{2\alpha} \int_{0}^{s} \int_{0}^{r} (e^{-\alpha(u-r)} - e^{\alpha(u+r)} du) dr \\
+&= \int_{0}^{s} Var(c) \left[\dfrac{e^{-\alpha r} - e^{-\alpha(2r)}}{\alpha}\right] + \dfrac{\sigma^2}{2\alpha}\left[\left(\dfrac{1 - e^{-\alpha r}}{\alpha}\right) - \left(\dfrac{e^{-\alpha r} - e^{-\alpha (2r)}}{\alpha}\right)\right] dr \\
+&= Var(c) \left[ \dfrac{(1 - e^{-\alpha r})}{\alpha^2} - \dfrac{(1 - e^{-2\alpha s})}{2\alpha^2}\right] + \dfrac{\sigma^2}{2\alpha}\left[\dfrac{s}{\alpha} - \dfrac{(1 - e^{-\alpha s})}{\alpha^2} - \dfrac{(1-e^{-\alpha s})}{\alpha^2} + \dfrac{(1 - e^{-2\alpha s})}{2\alpha^2}\right] \\
+&= Var(c) \left[ \dfrac{(1 - e^{-\alpha s})}{\alpha^2} - \dfrac{(1 - e^{-2\alpha s}}{2\alpha^2}\right] + \dfrac{\sigma^2}{2\alpha} \left[ \dfrac{s}{\alpha} - \dfrac{2(1 - e^{-\alpha s})}{\alpha^2} + \dfrac{(1 - e^{-2\alpha s})}{2\alpha^2}\right]
+\end{align*}
+
+The second double integral is
+
+\begin{align*}
+& \int_{0}^{s} \int_{r}^{t} Cov(X_{r}, X_{u}) du dr \\
+&= \int_{0}^{s} \int_{r}^{t} e^{-\alpha(u + r)}\left[ Var(c) + \dfrac{(e^{2\alpha r} - 1)}{2\alpha} \sigma^2 \right] du dr \\
+&= \int_{0}^{s} Var(c) \left[ \dfrac{e^{-2\alpha r} - e^{-\alpha (r + t)}}{\alpha}\right] dr + \dfrac{\sigma^2}{2\alpha} \left[ \int_{0}^{s} \int_{r}^{t} \left(e^{\alpha (r-u)} - e^{-\alpha(u+r)}\right) du dr \right] \\
+&= \int_{0}^{s} Var(c) \left[ \dfrac{e^{-2\alpha r} - e^{-\alpha(r+t)}}{\alpha}\right] dr + \dfrac{\sigma^2}{2\alpha} \left[ \int_{0}^{s} \dfrac{1 - e^{-\alpha(t-r)}}{\alpha} - \left(\dfrac{e^{-2\alpha r} - e^{-\alpha(r+t)}}{\alpha}\right) ds \right] \\
+&= Var(c) \left[ \dfrac{1 - e^{-2\alpha s}}{2\alpha^2} - \dfrac{(e^{-\alpha t} - e^{-\alpha(r+t)})}{\alpha^2}\right] + \dfrac{\sigma^2}{2\alpha} \left[ \dfrac{e^{-\alpha(t-s)} - e^{-\alpha t} + sa}{\alpha^2} - \dfrac{(1 - e^{-2\alpha s})}{2\alpha^2} + \dfrac{(e^{-\alpha t} - e^{-\alpha(t+s)})}{\alpha^2} \right]
+\end{align*}
+
+So the covariance is
+
+\begin{align*}
+& Cov(Y_{s}, Y_{t}) \\
+&= Var(Y_{0}) + Var(c) \left[ \dfrac{(1 - e^{-\alpha s})}{\alpha^2} - \cancel{\dfrac{(1 - e^{-2 \alpha s})}{2\alpha^2}} + \cancel{\dfrac{(1 - e^{-2\alpha s})}{2\alpha^2}} - \dfrac{(e^{-\alpha t} - e^{-\alpha (s+t)})}{\alpha^2} \right] + \\
+& \qquad \dfrac{\sigma^2}{2\alpha} \left[ \dfrac{s}{\alpha} - \dfrac{2(1 - e^{-\alpha s})}{\alpha^2} + \cancel{\dfrac{(1 - e^{-2\alpha s})}{2\alpha^2}} + \dfrac{2e^{-\alpha t}}{\alpha^2} - \dfrac{e^{-\alpha(t-s)}}{\alpha^2} - \dfrac{e^{-\alpha(t+s)}}{\alpha^2} - \cancel{\dfrac{(1 - e^{-2\alpha s})}{\alpha^2}} + \dfrac{s\alpha}{\alpha^2} \right] \\
+&= Var(Y_{0}) + \left[ \dfrac{1 - e^{-\alpha s} - e^{-\alpha t} + e^{-\alpha(s+t)}}{\alpha^2}\right] Var(c) + \dfrac{\sigma^2}{\alpha^2} s + \dfrac{\sigma^2}{2\alpha^2} \left( -2 + 2e^{\alpha t} + 2e^{-\alpha s} - e^{-\alpha(t-s)} - e^{-\alpha(t+s)}\right)
+\end{align*}
+
+\end{solution}
+
+\begin{question}
+Obtain (4.42) and use it to find $E\left(\begin{array}{c} X_{t} \\ Y_{t} \end{array} \right)$ and check your result with (4.35) and (4.38). Find $cov\left(\left(\begin{array}{c} X_{s} \\ Y_{s} \end{array}\right), \left(\begin{array}{c} X_{t} \\ Y_{t} \end{array}\right)\right)$ and verify that the element (2,2) is the same as (4.40).
+\end{question}
+
+\begin{solution}
+For an OU process define $A$ as
+
+\begin{align*}
+A &= \left( \begin{array}{c c} -\alpha & 0 \\ 1 & 0 \end{array} \right)
+\end{align*}
+
+The eigenvalues of $A$ are found by setting the determinant of $A - \lambda I$ = 0, i.e.
+
+\begin{align*}
+det\left( \begin{array}{c c} -\alpha - \lambda & 0 \\ 0 & -\lambda \end{array} \right) = 0 \implies \lambda (\alpha + \lambda) = 0
+\end{align*}
+
+This gives eigenvalues $\lambda_{1} = 0$ and $\lambda_{2} = -\alpha$. The first eigenvector $v_{1}$ is found by setting $(A - \lambda_{1} I) v_{1} = 0$, i.e.
+
+\begin{align*}
+\left( \begin{array}{c c} -\alpha & 0 \\ 1 & 0 \end{array} \right) \left(\begin{array}{c} v_{1,1} \\ v_{1,2} \end{array} \right) = 0 \implies \begin{array}{c} \alpha v_{1,1} = 0 \\ v_{1,1} = 0 \end{array}
+\end{align*}
+
+so $v_{1} = (0, 1)$. Similarly we can find $v_{2}$ by setting $(A - \lambda_{2} I) v_{2} = 0$, i.e.
+
+\begin{align*}
+\left(\begin{array}{c c} 0 & 0 \\ 1 & \alpha \end{array} \right) \left( \begin{array}{c} v_{2,1} \\ v_{2,2} \end{array} \right) = 0 \implies v_{2,1} + \alpha v_{2,2} = 0
+\end{align*}
+
+so $v_{2} = (-\alpha, 1)$. Thus, if $P$ is matrix with column 1 equal to $v_{1}$ and column 2 equal to $v_{2}$ and $D$ is a matrix with $\lambda_{1}$ and $\lambda_{2}$ on the diagonal than the diagonalization of $A$ is
+
+\begin{align*}
+A &= PDP^{-1} \\
+&= \left( \begin{array}{c c} 0 & -\alpha \\ 1 & 1 \end{array} \right) \left(\begin{array}{c c} 0 & 0 \\ 0 & -\alpha \end{array} \right) \left(\begin{array}{c c} 0 & -\alpha \\ 1 & 1 \end{array} \right)^{-1} \\
+&= \left( \begin{array}{c c} 0 & -\alpha \\ 1 & 1 \end{array} \right) \left( \begin{array}{c c} 0 & 0 \\ 0 & -\alpha \end{array} \right) \left( \begin{array}{c c} \alpha^{-1} & 1 \\ -\alpha^{-1} & 0 \end{array} \right)
+\end{align*}
+
+Furthermore, the matrix exponentiation $\Phi(t) = e^{tA}$ is
+
+\begin{align*}
+e^{t A} &= P e^{tD} P^{-1} \\
+&= \left( \begin{array}{c c} 0 & -\alpha \\ 1 & 1 \end{array} \right) \left( \begin{array}{c c} 1 & 0 \\ 0 & e^{-tA} \end{array} \right) \left( \begin{array}{c c} \alpha^{-1} & 1 \\ -\alpha^{-1} & 0 \end{array} \right) \\
+&= \left(\begin{array}{c c} 0 & -\alpha e^{-t\alpha} \\ 1 & e^{-t\alpha}\end{array} \right) \left( \begin{array}{c c} \alpha^{-1} & 1 \\ - \alpha^{-1} & 0 \end{array} \right) \\
+&= \left(\begin{array}{c c} e^{-t\alpha} & 0 \\ \dfrac{1 - e^{-t\alpha}}{\alpha} & 1 \end{array} \right)
+\end{align*}
+
+Then, for the expected value we have that
+
+\begin{align*}
+E\left(\begin{array}{c} X_{t} \\ Y_{t} \end{array} \right) &= P ce^{\lambda t} \\
+&= \left(\begin{array}{c c} 0 & -\alpha \\ 1 & 1 \end{array} \right) \left(\begin{array}{c} c_{1} e^{\lambda_{1} t} \\ c_{2} e^{\lambda_{2} t} \end{array} \right) \\
+&= \left(\begin{array}{c c} 0 & -\alpha \\ 1 & 1 \end{array} \right) \left(\begin{array}{c} c_{1} \\ c_{2} e^{-\alpha t} \end{array} \right)
+\end{align*}
+
+Evaluating this expression at $t = 0$ gives
+
+\begin{align*}
+\left(\begin{array}{c} E(X_{0}) \\ E(Y_{0}) \end{array} \right) &= \left(\begin{array}{c c} 0 & -\alpha \\1 & 1 \end{array} \right) \left(\begin{array}{c} c_{1} \\ c_{2} \end{array} \right) \\
+&= \left(\begin{array}{c} -\alpha c_{2} \\ c_{1} + c_{2} \end{array} \right) \implies \begin{array}{c} c_{2} = -E(X_{0}) / \alpha \\ c_{1} = E(Y_{0}) + E(X_{0})/\alpha \end{array}
+\end{align*}
+
+So we have that
+
+\begin{align*}
+E\left(\begin{array}{c} X_{t} \\ Y_{t} \end{array} \right) &= \left(\begin{array}{c c} 0 & -\alpha \\ 1 & 1 \end{array} \right)  \left(\begin{array}{c} E(Y_{0}) + \dfrac{E(X_{0})}{\alpha} \\ \dfrac{- E(X_{0})}{\alpha}  e^{-\alpha t} \end{array} \right) \\
+&= \left(\begin{array}{c} E(X_{0}) e^{-\alpha t} \\ E(Y_{0}) + \dfrac{E(X_{0})}{\alpha} (1 - e^{-\alpha t}) \end{array} \right)
+\end{align*}
+
+Next, the covariance is
+
+\begin{align*}
+Cov\left(\left(\begin{array}{c} X_{s} \\ Y_{s} \end{array} \right), \left(\begin{array}{c} X_{t} \\ Y_{t} \end{array} \right) \right) &= \Phi(s) \left[ Var(c) + I(s) \right] \Phi(t)^{T} \qquad \text{for $s \leq t$}
+\end{align*}
+
+The first term is
+
+\begin{align*}
+\Phi(s) Var(c) \Phi(t)^{T} &= Var(c) \left(\begin{array}{c c} e^{-\alpha s} & 0 \\ \dfrac{1 - e^{-\alpha s}}{\alpha} & 1 \end{array} \right) \left(\begin{array}{c c} e^{-\alpha t} & \dfrac{1 - e^{-\alpha t}}{\alpha} \\ 0 & 1 \end{array} \right) \\
+&= Var(c) \left(\begin{array}{c c} e^{-\alpha(s+t)} & \dfrac{e^{-\alpha  s}(1 - e^{-\alpha t})}{\alpha} \\ \dfrac{(1 - e^{-\alpha s})}{\alpha} e^{-\alpha t} & \dfrac{(1 - e^{-\alpha s})(1 - e^{-\alpha t})}{\alpha^2} + 1 \end{array} \right)
+\end{align*}
+
+where the $2 \text{x} 2$ element is $Var(c) \left(\dfrac{1 - e^{-\alpha s} - e^{-\alpha t} + e^{-\alpha (s+t)}}{\alpha^2} + 1\right)$. For the second term in the covariance, we need to compute $I(s)$ where
+
+\begin{align*}
+I(s) &= \int_{0}^{s} \Phi(u)^{-1} \sigma(u) \sigma(u)^{T} \left[\Phi(u)^{-1}\right]^{T} du \\
+&= \int_{0}^{s} \left(\begin{array}{c c} e^{u \alpha} & 0 \\ \dfrac{1 - e^{-u \alpha}}{\alpha} & 1 \end{array} \right) \left(\begin{array}{c} \sigma \\ 0 \end{array}\right) \left(\begin{array}{c c} \sigma & 0 \end{array} \right) \left(\begin{array}{c c} e^{u \alpha} & \dfrac{1 - e^{u\alpha}}{\alpha} \\ 0 & 1 \end{array} \right) du
+\end{align*}
+
+These integrals can be computed component-wise, i.e.
+
+\begin{align*}
+I(s) &= \left(\begin{array}{c c} \int_{0}^{s} \sigma^{2} e^{2\alpha u} du & \int_{0}^{s} \dfrac{\sigma^2 e^{u\alpha} (1 - e^{\alpha u}) du}{\alpha} \\
+\int_{0}^{s} \sigma^{2} (1 - e^{u \alpha}) e^{u \alpha} du & \int_{0}^{s} \dfrac{\sigma^{2} (1 - e^{u \alpha})(1 - e^{\alpha u})du}{\alpha^2} \end{array}\right)
+\end{align*}
+
+The elements of $I(s)$ are
+
+\begin{align*}
+I_{1,1}(s) &= \dfrac{\sigma^2}{2\alpha} (e^{2\alpha s} - 1) \\
+I_{1,2}(s) &= \dfrac{\sigma^{2} (2 e^{2\alpha - e^{2\alpha s} - 1})}{2\alpha^2} \\
+I_{2,2}(s) &= \dfrac{\sigma^2(2s\alpha + e^{2\alpha s} + 3 - 4e^{\alpha s})}{2\alpha^3}
+\end{align*}
+
+So the second term in the covariance is
+
+\begin{align*}
+& \Phi(s) I(s) \Phi(t)^{T} \\
+&= \left(\begin{array}{c c} e^{-\alpha s} & 0 \\ \dfrac{1 - e^{-\alpha s}}{\alpha} & 1 \end{array} \right)\left(\begin{array}{c c} I_{1,1}(s) & I_{1,2}(s) \\ I_{1,2}(s) & I_{2,2}(s) \end{array}\right) \left(\begin{array}{c c} e^{-\alpha t} & \dfrac{1 - e^{-\alpha t}}{\alpha} \\ 0 & 1 \end{array} \right) \\
+&= \left(\begin{array}{c c} e^{-\alpha s} I_{1,1}(s) & e^{-\alpha s} I_{1,2}(s) \\ \dfrac{1 - e^{-\alpha s}}{\alpha} I_{1,1}(s) + I_{1,2}(s) & \dfrac{1 - e^{-\alpha s}}{\alpha} I_{1,2}(s) + I_{2,2}(s) \end{array} \right)\left(\begin{array}{c c} e^{-\alpha t} & \dfrac{1 - e^{-\alpha t}}{\alpha} \\ 0 & 1 \end{array} \right) \\
+&= \left(\begin{array}{c c} e^{-\alpha s} I_{1,1}(s) e^{-\alpha t} & \dfrac{e^{-\alpha s} I_{1,1}(s) (1 - e^{-\alpha t})}{\alpha} + e^{-\alpha s} I_{1,2}(s) \\
+\dfrac{(1 - e^{-\alpha s})I_{1,1}(s) e^{-\alpha t}}{\alpha} + e^{-\alpha t} I_{1,2}(s) & \dfrac{(1 - e^{-\alpha t})(1 - e^{-\alpha s})}{\alpha^2} I_{1,1}(s) + \dfrac{(1 - e^{-\alpha t}) + (1 - e^{-\alpha s})}{\alpha} I_{1,2}(s) + I_{2,2}(s) \end{array}\right)
+\end{align*}
+
+where the $2\text{x}2$ element is
+
+\begin{align*}
+& \dfrac{(1 - e^{-\alpha t})(1 - e^{-\alpha s})}{\alpha^2} I_{1,1}(s) + \dfrac{(1 - e^{-\alpha t}) + (1 - e^{-\alpha s})}{\alpha} I_{1,2}(s) + I_{2,2}(s) \\
+&= \dfrac{(1 - e^{-\alpha t})(1 - e^{-\alpha s})}{\alpha^2} \dfrac{\sigma^2}{2\alpha} (e^{2\alpha s} - 1) + \dfrac{(1 - e^{-\alpha t}) + (1 - e^{-\alpha s})}{\alpha} \dfrac{\sigma^{2} (2 e^{2\alpha - e^{2\alpha s} - 1})}{2\alpha^2} + \dfrac{\sigma^2(2s\alpha + e^{2\alpha s} + 3 - 4e^{\alpha s})}{2\alpha^3} \\
+&= \dfrac{\sigma^2}{\alpha^2} s + \dfrac{\sigma^2}{2\alpha^3} [ \cancel{e^{2\alpha s}} - \cancel{e^{\alpha s}} - \cancel{e^{\alpha(2s - t)}} + e^{\alpha(s-t)} - 1 + e^{-\alpha s} + e^{-\alpha t} - e^{-\alpha(s+t)} + 2e^{\alpha s} - e^{2\alpha s} - 1 \\
+& \qquad\qquad\qquad -2e^{\alpha(s-t)} + \cancel{e^{\alpha(2s-t)}} + e^{-\alpha t} + 2e^{\alpha s} - \cancel{e^{2\alpha s}} - 1 - 2 + \cancel{e^{\alpha s}} + e^{-\alpha s} ] \\
+&= \dfrac{\sigma^2}{\alpha^2} s + \dfrac{\sigma^2}{2\alpha^3} [2e^{-\alpha t} - e^{-\alpha(s+t)} - e^{-\alpha(t-s)} - 2 + 2e^{-\alpha s}]
+\end{align*}
+
+Combining the 2x2 elements we have that
+
+\begin{align*}
+Cov(Y_{s}, Y_{t}) &= Var(c) \left(\dfrac{1 - e^{-\alpha s} - e^{-\alpha t} + e^{-\alpha (s+t)}}{\alpha^2} + 1\right) + \dfrac{\sigma^2}{\alpha^2} s + \dfrac{\sigma^2}{2\alpha^3} [2e^{-\alpha t} - e^{-\alpha(s+t)} - e^{-\alpha(t-s)} - 2 + 2e^{-\alpha s}]
+\end{align*}
+
+\end{solution}
+
+\begin{question}
+Derive the result for $e^{At}$ in (4.52).
+\end{question}
+
+\begin{solution}
+For the second order SDE define $A$ as
+
+\begin{align*}
+A &= \left(\begin{array}{c c} \alpha_{1} & \alpha_{0} \\ 1 & 0 \end{array} \right)
+\end{align*}
+
+The eigenvalues of $A$ are found by setting the determinant of $A - \lambda I = 0$, i.e.
+
+\begin{align*}
+det\left(\begin{array}{c c} \alpha_{1} - \lambda & \alpha_{0} \\ 1 & -\lambda \end{array} \right) = 0 \implies  (\alpha_{1} - \lambda)(-\lambda) -\alpha_{0} = 0
+\end{align*}
+
+The eigenvalues are the solutions of the quadratic equation $\lambda^{2} - \alpha_{1}\lambda - \alpha_{0} = 0$, i.e.
+
+\begin{align*}
+\lambda_{1} &= \dfrac{\alpha_{1} + \sqrt{\alpha_{1}^{2} + 4\alpha_{0}}}{2} \\
+\lambda_{2} &= \dfrac{\alpha_{1} - \sqrt{\alpha_{1}^{2} + 4\alpha_{0}}}{2}
+\end{align*}
+
+The first eigenvector $v_{1}$ is found by setting $(A -- \lambda_{1}I) v_{1} = 0$, i.e.
+
+\begin{align*}
+\left(\begin{array}{c c} \alpha_{1} - \lambda_{1} & \alpha_{0} \\ 1 & -\lambda_{1} \end{array}\right) \left(\begin{array}{c} v_{1,1} \\ v_{1,2} \end{array} \right) = 0 \implies \begin{array}{c} (\alpha_{1} - \lambda_{1}) v_{1,1} + \alpha_{0} v_{1,2} = 0 \\ v_{1,1} - \lambda_{1} v_{1,2} = 0 \end{array}
+\end{align*}
+
+so $v_{1} = (\lambda_{1}, 1)$. Similarly we can find $v_{2}$ by setting $(A - \lambda_{2}I)v_{2} = 0$, i.e.
+
+\begin{align*}
+\left(\begin{array}{c c} \alpha_{1} - \lambda_{2} & \alpha_{0} \\ 1 & -\lambda_{2} \end{array} \right) \left(\begin{array}{c} v_{2,1} \\ v_{2,2} \end{array} \right) = 0
+\end{align*}
+
+which can be solved the same was as $v_{1}$ giving $v_{2} = (\lambda_{2}, 1)$. Using the diagonalization of $A$ (see Exercise 4.2)
+
+\begin{align*}
+\Phi(t) &= e^{tA} \\
+&= P e^{tD} P^{-1} \\
+&= \left(\begin{array}{c c} \lambda_{1} & \lambda_{2} \\ 1 & 1 \end{array} \right) \left(\begin{array}{c c} e^{\lambda_{1} t} & 0  \\ 0 & e^{\lambda_{2}t} \end{array} \right)  \left(\begin{array}{c c} \dfrac{1}{\lambda_{1} - \lambda_{2}} & \dfrac{-\lambda_{2}}{\lambda_{1} - \lambda_{2}} \\ \dfrac{-1}{\lambda_{1} - \lambda_{2}} & \dfrac{\lambda_{1}}{\lambda_{1} - \lambda_{2}} \end{array} \right) \\
+&= \dfrac{1}{\lambda_{1} - \lambda_{2}} \left(\begin{array}{c c} \lambda_{1} e^{\lambda_{1} t} & \lambda_{2} e^{\lambda_{2} t} \\ e^{\lambda_{1} t} & e^{\lambda_{2} t} \end{array}\right) \left(\begin{array}{c c} 1 & -\lambda_{2} \\ -1 & \lambda_{1} \end{array} \right) \\
+&= \dfrac{1}{\lambda_{1} - \lambda_{2}} \left(\begin{array}{c c} \lambda_{1} e^{\lambda_{1} t} - \lambda_{2} e^{\lambda_{2} t} & -\lambda_{1} \lambda_{2} e^{\lambda_{1} t} + \lambda_{1} \lambda_{2} e^{\lambda_{2} t} \\ e^{\lambda_{1} t} - e^{\lambda_{2} t} & -\lambda_{2} e^{\lambda_{1} t} + \lambda_{1} e^{\lambda_{2} t} \end{array} \right)
+\end{align*}
+
+\end{solution}
+
+\begin{question}
+Modeling the force of interest by the Brownian Motion centered at $\delta = 0.05$ and with $\sigma = 0.01$, find the expected value and variance of $pv(10)$. What is $cov(pv(5), pv(10))$?
+\end{question}
+
+\begin{solution}
+The R code below was used to compute the expected value and variance of $pv(10)$.
+
+\begin{Schunk}
+\begin{Sinput}
+> wienermodel = iratemodel(list(delta0 = 0.05, sigma = 0.01), 
++                          "gbm")
+> pv10ev = pv.ev(10, wienermodel)
+> pv10var = pv.var(10, wienermodel)
+> pvcov = pv.cov(5,10,wienermodel)
+\end{Sinput}
+\end{Schunk}
+
+This gives $E[pv(10)] = 0.61672421$, $Var[pv(10)] = 0.01289196$ and $cov(pv(5), pv(10)) = 0.00503982$.
+
+\end{solution}
+
+\begin{question}
+Assume that the force of interest is an Ornstein-Uhlenbeck process with $\delta_{0} = 0.08$, $\delta = 0.05$, $\alpha = 0.1$ and $\sigma = 0.01$.
+
+\begin{enumerate}[(i)]
+\item What is the expected value and variance of $pv(10)$?
+\item What is $cov(pv(5), pv(10))$?
+\item Find the expected value and variance of $a_{\lcroof{10}}$.
+\end{enumerate}
+
+\end{question}
+
+\begin{solution}
+\begin{enumerate}[(i)]
+\item The R code below was used to compute the expected value and variance of $pv(10)$.
+
+\begin{Schunk}
+\begin{Sinput}
+> oumodel = iratemodel(list(delta0 = 0.08, delta = 0.05, 
++                           alpha = 0.1, sigma = 0.01), "ou")
+> pv10ev = pv.ev(10, oumodel)
+> pv10var = pv.var(10, oumodel)
+> pvcov = pv.cov(5, 10, oumodel)
+\end{Sinput}
+\end{Schunk}
+
+This gives $E[pv(10)] = 0.50599342$ and $Var[pv(10)] = 0.00434$.
+
+\item The covariance is $cov(pv(5), pv(10)) = 0.00209571$.
+
+\item The following code was used to compute the expected value and variance of $a_{\lcroof{10}}$.
+
+\begin{Schunk}
+\begin{Sinput}
+> annev = ann.ev(10, oumodel)
+> annvar = ann.var(10, oumodel)
+\end{Sinput}
+\end{Schunk}
+
+Using this code gives $E[a_{\lcroof{10}}] = 6.8841889$ and $Var[a_{\lcroof{10}]}] = 0.13503997$.
+
+\end{enumerate}
+\end{solution}
+
+\begin{question}
+Use Ito's formula to prove that:
+
+\begin{enumerate}[(i)]
+\item $dW_{t}^{2} = 2W_{t} dW_{t} + dt$
+\item $de^{W_{t}} = e^{W_{t}} dW_{t} + 0.5 e^{W_{t}} dt$
+\item $d(e^{\sigma W_{t} - 0.5\sigma^{2} t}) = \sigma (e^{\sigma W_{t} - 0.5 \sigma^{2} t}) dW_{t}$
+\end{enumerate}
+
+\end{question}
+
+\begin{solution}
+\begin{enumerate}[(i)]
+\item Ito's formula can be stated as 
+
+\begin{align*}
+dY(t, X_{t}) &= Y_{X} dX_{t} + 0.5 Y_{XX} dX_{t}^2 + Y_{t}dt
+\end{align*}
+
+In this case, $Y(t, W_t) = W_{t}^2$. So $Y_{W} = 2W_{t}$, $Y_{WW} = 2$, $Y_{t} = 0$. Using Ito's formula we have that
+
+\begin{align*}
+dY(t, W_{t}) &= 2W_{t}dW_{t} + 0.5(2) dW_{t}^2 = 2W_{t} dW_{t} + dt
+\end{align*}
+
+\item In this case, $Y(t, W_{t}) = e^{W_{t}}$. So $Y_{W} = e^{W_{t}}$, $Y_{WW} = e^{W_{t}}$, $Y_{t} = 0$. Using Ito's formula we have that
+
+\begin{align*}
+dY(t, W_{t}) &= e^{W_{t}} dW_{t} + 0.5 e^{W(t)} dW_{t}^2 = e^{W_{t}} dW_{t} + 0.5 e^{W_{t}} dt
+\end{align*}
+
+\item In this case, $Y(t, W_{t}) = e^{\sigma W_{t} - 0.5 \sigma^2 t}$. So $Y_{W} = \sigma e^{\sigma W_{t} - 0.5 \sigma^2 t}$, $Y_{WW} = \sigma^2 e^{\sigma W_{t} - 0.5\sigma^2 t}$, $Y_{t} = - 0.5\sigma^2 e^{\sigma W_{t} - 0.5\sigma^2 t}$. Using Ito's formula, we have that
+
+\begin{align*}
+dY(t, W_{t}) &= \sigma e^{\sigma W_{t} - 0.5 \sigma^2 t} dW_{t} + 0.5 \sigma^2 e^{\sigma W_{t} - 0.5\sigma^2 t} dW_{t}^2 - 0.5\sigma^2 e^{\sigma W_{t} - 0.5\sigma^2 t} dt = \sigma e^{\sigma W_{t} - 0.5 \sigma^2 t} dW_{t}
+\end{align*}
+
+\end{enumerate}
+\end{solution}
+
+\newpage
+\setcounter{section}{4}
+\section{Discrete versus Continuous Models}
+
+\begin{question}
+Find the discrete representation of the second order SDE with $\alpha_{1} = -0.5$, $\alpha_{0} = -0.04$, $\sigma = 0.01$ and $\Delta = 1$. Is it stationary?
+\end{question}
+
+\begin{solution}
+The R code below was used to estimate the parameters of an ARMA(2,1).
+
+\begin{Schunk}
+\begin{Sinput}
+> sdemodel = iratemodel(params = list(alpha1 = -0.5, alpha2 = -0.04,
++ 	sigma2 = 0.01), "second")
+> armamodel = iratemodel.convert("second", "arma", sdemodel, 1)
+\end{Sinput}
+\end{Schunk}
+
+
+This gives $\phi_{1} = 1.57515746$, $\phi_{2} = -0.60653066$, $\theta_{1} = -0.26534494$ and $\sigma_{a} =0.00619855$.
+
+
+\end{solution}
+
+\begin{question}
+It is believed that some discrete data was obtained for a second order SDE sampled at intervals $\Delta = 5$. The discrete data was used to estimate the parameters of an ARMA(2,1). The estimates $\phi_{1} = 1.05$, $\phi_{2} = -0.095$, $\theta_{1} = -0.05$.
+
+\begin{enumerate}[(i)]
+\item Determine $\alpha_{1}$ and $\alpha_{0}$.
+\item Suppose that your answers in (i) are the true parameters of the continuous system. What should the values of $\phi_{1}$, $\phi_{2}$ and $\theta_{1}$ be in order to have a covariance equivalent system? Compare them with your respective estimates.
+\end{enumerate}
+
+\end{question}
+
+\begin{solution}
+\begin{enumerate}[(i)]
+\item The R code used is shown below.
+
+\begin{Schunk}
+\begin{Sinput}
+> armamodel = iratemodel(params = list(phi1 = 1.05, phi2 = -0.095,
++ 	theta1 = -0.05), "arma")
+> sdemodel = iratemodel.convert("arma", "second", armamodel, 5)
+\end{Sinput}
+\end{Schunk}
+
+
+This gives $\alpha_{0} = -0.00472429$ and $\alpha_{1} = -0.47077568$.
+
+\item The R code below was used to calculate $\phi_{1}, \phi_{2}$ and $\theta_{1}$.
+
+\begin{Schunk}
+\begin{Sinput}
+> sdemodel$sigma2 = 0.01 # arbitrary here
+> armamodel = iratemodel.convert("second", "arma", sdemodel, 5)
+\end{Sinput}
+\end{Schunk}
+
+
+This gives $\phi_{1} = 1.05$, $\phi_{2} = -0.095$ and $\theta_{1} = -0.2066469$. Note that the value of $\theta_{1}$ has been changed.
+
+\end{enumerate}
+
+\end{solution}
+
+\begin{question}
+Any ARMA(2,1) for which ($\phi_{1}, \phi_{2}$) lies in the ``stability region'' above the parabola has corresponding $\mu_{1}$ and $\mu_{2}$ that are real and uniquely determined. This implies that a unique covariance equivalent second order SDE exists. Comment.
+\end{question}
+
+\begin{solution}
+If $\phi_{1}$ and $\phi_{2}$ lie in the stability region then $|\lambda_{1}| < 1$ and $|\lambda_{2}| < 1$. So we can calculate unique real values of $\mu_{1}$ and $mu_{2}$ using
+
+\begin{align*}
+\mu_{1} &= \ln(\lambda_{1}) / \Delta \\
+\mu_{2} &= \ln(\lambda_{2}) / \Delta
+\end{align*}
+
+and then the parameters of the SDE are $\alpha_{1} = \mu_{1} + \mu_{2}$ and $\alpha_{2} = -\mu_{1}\mu_{2}$. So a unique covariance equivalent SDE will exist in this case.
+
+\end{solution}
+
+\newpage
+\setcounter{section}{7}
+\section{Discount Function (or Present Value)}
+
+\begin{question}
+Show (8.2).
+\end{question}
+
+\begin{solution}
+For an OU process, we have that
+%
+\begin{align*}
+E[y(t)] &= \delta t + (\delta_{0} - \delta)\left(\dfrac{1 - e^{-\alpha t}}{\alpha}\right) \\
+Var[y(t)] &= \dfrac{\sigma^{2}}{\alpha^2} t + \dfrac{\sigma^2}{2\alpha^3}\left(-3 + 4e^{-\alpha t} - e^{-2\alpha t}\right)
+\end{align*}
+
+So we have that
+%
+\begin{align*}
+E[e^{-y(t)}] &= e^{-E[y(t)] + 0.5Var[y(t)]} \\
+&= e^{-\delta t} e^{-(\delta_{0} - \delta)/\alpha (1 - e^{-\alpha t})} e^{\sigma^{2} / (2\alpha^2) t} e^{\sigma^2 / (4\alpha^{3}) (-3)} e^{\sigma^{2} / \left(4\alpha^{3}) (4e^{-\alpha t} - e^{-2\alpha t}\right)} \\
+&= e^{t\left(\sigma^{2}/(2\alpha^2) - \delta\right)} e^{-(\delta_{0} - \delta)/\alpha (1 - e^{-\alpha t})} e^{-3\sigma^{2}/(4\alpha^{3})} e^{\sigma^{2}/(4\alpha^{3}) (4e^{-\alpha t} - e^{-2\alpha t})} \\
+\lim_{t \to \infty} E[e^{-y(t)}] &= e^{-(\delta_{0} - \delta)/\alpha} e^{-3\sigma^{2}/(4\alpha^{3})} \lim_{t \to \infty} e^{t(\sigma^{2}/(2\alpha^2) - \delta)} \\
+&= \begin{cases}
+0 & \delta > \sigma^{2}/(2\alpha^{2}) \\
+e^{-(\delta_{0} - \delta)/\alpha} e^{-3\sigma^{2} / (4\alpha^{3})} & \delta = \sigma^{2} / (2\alpha^{2}) \\
+\infty & \delta < \sigma^{2} / (2\alpha^{2})
+\end{cases}
+\end{align*}
+
+\end{solution}
+
+\begin{question}
+Show (8.3).
+\end{question}
+
+\begin{solution}
+For the second moment, we have that
+%
+\begin{align*}
+E[e^{-2y(t)}] &= e^{-2E[y(t)] + 2Var[y(t)]} \\
+&= e^{-2\delta t} e^{-2(\delta_{0} - \delta)/\alpha (1 - e^{-\alpha t})} e^{2\sigma^{2} / \alpha^{2} t} e^{\sigma^{2} / \alpha^{3} (-3 + 4e^{-\alpha t} - e^{-2\alpa t})} \\
+&= e^{t\left(2\sigma^{2}/\alpha^{2} - 2\delta\right)} e^{-2(\delta_{0} - \delta)/\alpha (1 - e^{-\alpha t})} e^{-3\sigma^{2} / \alpha^{3}} e^{\sigma^{2}/\alpha^{3} (4e^{-\alpha t} - e^{-2\alpha t})} \\
+\lim_{t \to \infty} E[e^{-2y(t)}] &= \begin{cases}
+0 & \delta > \sigma^{2} / \alpha^{2} \\
+e^{-2(\delta_{0} - \delta)/\alpha} e^{-3\sigma^{2} / \alpha^{3}} & \delta = \sigma^{2} / \alpha^{2} \\
+\infty & \delta < \sigma^{2}/\alpha^{2}
+\end{cases}
+\end{align*}
+
+So $\lim_{t \to \infty} Var[e^{-y(t)}] = \lim_{t \to \infty} E[e^{-2y(t)}]$.
+
+\end{solution}
+
+\begin{question}
+Show that $[cv(e^{-y(t)})]^{2} = e^{Var(y(t))} - 1$.
+\end{question}
+
+\begin{solution}
+The quantities we are interested in are
+%
+\begin{align*}
+E[e^{-y(t)}] &= e^{-E[y(t)] + 0.5Var[y(t)]} \\
+E[e^{-y(t)}]^{2} &= e^{-2E[y(t)] + Var[y(t)]} \\
+E[e^{-2y(t)}] &= e^{-2E[y(t)] + 2Var[y(t)]}
+\end{align*}
+
+So the coefficient of variation is
+%
+\begin{align*}
+cv[e^{-y(t)}]^{2} &= \dfrac{E[e^{-2y(t)}] - E[e^{-y(t)}]^{2}}{E[e^{-y(t)}]^{2}} \\
+&= \dfrac{[e^{-2E[y(t)] + Var[y(t)]}][e^{Var[y(t)]} - 1]}{e^{-2E[y(t)] + Var[y(t)]}} \\
+&= e^{Var[y(t)]} - 1
+\end{align*}
+
+\end{solution}
+
+\begin{question}
+Noting that (8.7) is not valid when the force of interest is modeled by a White Noise process, determine whether the coefficient of variation is an increasing function of $t$ or not.
+\end{question}
+
+\begin{solution}
+For a white noise process, $\delta_{t} \sim N(\delta, \sigma^{2})$ so $y(t) \sim N(\delta t, \sigma^{2} t)$, i.e. $Var[y(t)] = \sigma^{2} t$. So the derivative of the variance is
+
+\begin{align*}
+\dfrac{d}{dt} Var[y(t)] &= \dfrac{d}{dt} \sigma^{2} t = \sigma^{2} > 0
+\end{align*}
+
+so the coefficient variation is an increasing function of $t$.
+
+\end{solution}
+
+\end{document}

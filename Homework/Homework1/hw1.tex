@@ -1,0 +1,102 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage[links,assignheader]{assign}
+
+\lhead{Homework \#1 \\ Acma 490}
+\rhead{Nathan Esau \\ 301197568}
+
+\usepackage{Sweave}
+\begin{document}
+
+\begin{question}
+Fit an AR(1) model to the data by implementing the least square method presented on page 10 of the lecture notes.
+\end{question}
+
+\begin{solution}
+The time series data is plotted in Figure \ref{fig:tsplot}.
+
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{hw1-tsplot}
+\end{center}
+\vspace{-10mm}
+\caption{Data for Homework 1}
+\label{fig:tsplot}
+\end{figure}
+
+\medskip\noindent
+The least squares method is implemented below in \texttt{R} and the parameter estimates are calculated for the provided time series.
+
+\begin{Schunk}
+\begin{Sinput}
+> fit.ar1 <- function(x) {
++   
++   N <- length(x)
++   
++   # based on (3.17) and (3.18)
++   phi1 = sum(x[2:N] * x[1:(N-1)]) / sum(x[1:(N-1)]^2)
++   sigma2 = sum((x[2:N] - phi1 * x[1:(N-1)])^2) / (N - 1)
++   
++   names(phi1) <- "ar1"
++   
++   list(coef = phi1, sigma2 = sigma2)
++ }
+> y <- tsdata$Series
+> x <- tsdata$Series - mean(y)
+> model1 <- fit.ar1(x)
+\end{Sinput}
+\end{Schunk}
+
+
+\medskip\noindent
+This gives $\hat{\phi}_{1} = 0.83453413$ and $\hat{\sigma}^{2}_{a} = 0.00037948$.
+
+\end{solution}
+
+\begin{question}
+Fit an AR(1) model to the data using a package.
+
+\begin{Schunk}
+\begin{Sinput}
+> model2 <- arima(x, c(1,0,0), include.mean = FALSE, method = 'CSS')
+> model3 <- arima(x, c(1,0,0), include.mean = FALSE, method = 'CSS-ML')
+\end{Sinput}
+\end{Schunk}
+
+
+\medskip\noindent
+\begin{enumerate}[(i)]
+\item If method \texttt{CSS} is used, we get $\hat{\phi}_{1} = 0.83453412$ and $\hat{\sigma}^{2}_{a} = 0.00037948$.
+\item If method \texttt{CSS-ML} is used (i.e. the default method), we get $\hat{\phi}_{1} = 0.83576532$ and $\hat{\sigma}^{2}_{a} = 0.00038004$.
+\end{enumerate}
+
+\end{question}
+
+\begin{question}
+Compare the fitted models.
+\end{question}
+
+\begin{solution}
+The fitted models are compared in Table \ref{tab:models}.
+
+% latex table generated in R 3.3.1 by xtable 1.8-2 package
+% Tue Jan 24 20:49:54 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{lrrl}
+  \hline
+Model & $\hat{\phi}_{1}$ & $\hat{\sigma}^{2}_{a}$ & Call \\ 
+  \hline
+\texttt{model1} & 0.83453413 & 0.00037948 & \texttt{fit.ar1} \\ 
+  \texttt{model2} & 0.83453412 & 0.00037948 & \texttt{arima(method = `CSS')} \\ 
+  \texttt{model3} & 0.83576532 & 0.00038004 & \texttt{arima(method = `CSS-ML')} \\ 
+   \hline
+\end{tabular}
+\caption{Comparison of fitted models} 
+\label{tab:models}
+\end{table}
+\end{solution}
+
+\end{document}

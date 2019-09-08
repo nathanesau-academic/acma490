@@ -1,0 +1,199 @@
+setwd("D:/acma490/Exercises/R/LifeInsuranceContracts")
+
+## parameters
+OMEGA = 103
+DELTA = 0.05
+DELTA0 = 0.08
+ALPHA = 0.10
+SIGMA = 0.02
+
+## life table
+MORTTABLE1 <- read.csv("MortalityTable_ca80m.csv", header = TRUE)
+MORTTABLE1 <- MORTTABLE1[-1,]
+names(MORTTABLE1) <- c("x", "qx")
+MORTTABLE1$x <- as.numeric(as.character(MORTTABLE1$x))
+MORTTABLE1$qx <- as.numeric(as.character(MORTTABLE1$qx))
+
+## mortality functions
+kpx <- function(k, x, omega = OMEGA, table = "MORTTABLE1")
+{
+  ifelse(k > omega - x, 0, 
+         ifelse(k > 0, prod(1 - get(table)$qx[seq(x, x+k-1, 1) + 1]), 1))
+}
+
+kdeferredqx <- function(k, x, omega = OMEGA, table = "MORTTABLE1")
+{
+  ifelse(x + k > OMEGA - 1, 0,
+         kpx(k, x, OMEGA, table) * get(table)$qx[x+k+1])
+}
+
+## OU functions
+y.ev <- function(t, delta = DELTA, delta0 = DELTA0, alpha = ALPHA)
+{
+  delta*t + (delta0 - delta) * (1 - exp(-alpha*t)) / alpha
+}
+
+y.var <- function(t, alpha = ALPHA, sigma = SIGMA)
+{
+  sigma^2/alpha^2 * t + sigma^2 / (2*alpha^3) * (-3 + 4*exp(-alpha*t) - exp(-2*alpha*t))
+}
+
+y.cov <- function(s, t, alpha = ALPHA, sigma = SIGMA)
+{
+  sigma^2 / alpha^2 * min(s, t) +
+    sigma^2 / (2*alpha^3) * (-2 + 2*exp(-alpha*s) + 2*exp(-alpha*t) 
+                             - exp(-alpha*(abs(t-s))) - exp(-alpha*(t+s)))
+}
+
+## pv functions
+pv.moment <- function(t, moment, mu = -y.ev(t), sigma2 = y.var(t))
+{
+  exp(moment*mu + 0.5*sigma2*moment^2) 
+}
+
+pv.ev <- function(t, mu = -y.ev(t), sigma2 = y.var(t))
+{
+  pv.moment(t, moment = 1, mu = mu, sigma2 = sigma2)
+}
+
+pv.cov <- function(s, t)
+{
+  mu <- -(y.ev(s) + y.ev(t))
+  sigma2 <- y.var(s) + y.var(t) + 2*y.cov(s,t)
+  EXY <- exp(mu + 0.5*sigma2)
+  EXEY <- pv.ev(s) * pv.ev(t)
+  
+  EXY - EXEY
+}
+
+term.moment <- function(n, x, d, moment, table = "MORTTABLE1")
+{
+  total = 0
+  
+  for(k in seq(0,n-1,1))
+  {
+    total = total + pv.moment(k+1, moment = moment) * d^moment * kdeferredqx(k, x, OMEGA, table)
+  }
+  
+  total
+}
+
+term.var <- function(n, x, d, table = "MORTTABLE1")
+{
+  term.moment(n,x,d,moment=2,table) - term.moment(n,x,d,moment=1,table)^2  
+}
+
+var.insrisk <- function(n, x, d, table = "MORTTABLE1")
+{
+  total = 0
+  
+  for(k in seq(0,n-1,1))
+  {
+    for(j in seq(0,n-1,1))
+    {
+      total = total + pv.cov(k+1,j+1) * kdeferredqx(k,x) * kdeferredqx(j, x)
+    }
+  }
+  
+  total
+}
+
+var.insrisk2 <- function(n, x, d, table = "MORTTABLE1")
+{
+  total = 0
+  
+  for(k in seq(0,n-1,1))
+  {
+    for(j in seq(0,n-1,1))
+    {
+      if(k==j)
+      {
+        total = total + pv.cov(k+1,j+1) * kdeferredqx(k,x)
+      }
+    }
+  }
+  
+  total
+}
+
+delta.ev <- function(t, delta = DELTA, delta0 = DELTA0, alpha = ALPHA)
+{
+  delta + exp(-alpha * t) * (delta0 - delta)
+}
+
+var.invrisk <- function(n, x, table = "MORTTABLE1")
+{
+  second= 0
+  first = 0
+  
+  for(k in seq(0,n-1,1))
+  {
+    second = second + pv.moment(k+1,1)^2 * kdeferredqx(k, x, OMEGA, table)
+    first = first + pv.moment(k+1,1) * kdeferredqx(k, x, OMEGA, table)
+  }
+  
+  second - first^2
+}
+
+var.invrisk2 <- function(n, x, table = "MORTTABLE1")
+{
+  second= 0
+  first = 0
+  
+  for(k in seq(0,n-1,1))
+  {
+    second = second + exp(-y.ev(k+1)*2) * kdeferredqx(k, x, OMEGA, table)
+    first = first + exp(-y.ev(k+1)) * kdeferredqx(k, x, OMEGA, table)
+  }
+  
+  second - first^2
+}
+
+term.var(10,50,1)
+var.insrisk(10, 50, 1)
+var.insrisk2(10,50,1)
+var.invrisk(10,50)
+var.invrisk2(10,50)
+
+term.ev.two <- function(n, x, d, table = "MORTTABLE1")
+{
+  total = 0
+  
+  for(i in seq(0, n-1, 1))
+  {
+    for(j in seq(0, n-1, 1))
+    {
+      mu <- -(y.ev(i+1) + y.ev(j+1))
+      sigma2 <- y.var(i+1) + y.var(j+1) + 2*y.cov(i+1,j+1)
+      EPV <- exp(mu + 0.5* sigma2) # EPV not accounting for mortality
+      
+      total = total + EPV * kdeferredqx(i, x, OMEGA, table) * kdeferredqx(j, x, OMEGA, table) * d^2
+    }
+  }
+  
+  total
+}
+
+term.port.moment <- function(n, x, d, c, moment, table = "MORTTABLE1")
+{
+  epv = 0
+  
+  if(moment == 1)
+  {
+    epv = term.moment(n, x, d, moment, table) * c
+  }
+  else if(moment == 2)
+  {
+    epv = c * (c - 1) * term.ev.two(n, x, d, table) + c * term.moment(n, x, d, 2, table)
+  }
+  
+  epv
+}
+
+term.port.sd <- function(n, x, d, c, table = "MORTTABLE1")
+{
+  sqrt(term.port.moment(n, x, d, c, 2, table) - term.port.moment(n, x, d, c, 1, table)^2)
+}
+
+term.port.sd(10,50,1,10)/10
+term.port.sd(10,50,1,1e+18)/1e+18
